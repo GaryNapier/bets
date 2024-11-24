@@ -1,11 +1,13 @@
 
 
-
-
+library(data.table)
+library(stringr)
 
 # Clean vector of prices
 # Remove rubbish strings "ex", RF etc
 # Convert fraction to decimal price and concat with already decimal 
+# Only used in preliminary_wrangling.R
+#' @export
 CleanPrice <- function(price){
   
   price <- gsub("ex|\\(RF\\)|\\*|\\+|R4", "", price)
@@ -24,11 +26,12 @@ CleanPrice <- function(price){
   price_split$dec
 }
 
+#' @export
 CleanMoney <- function(x){
   as.numeric(gsub(",", "", gsub("£", "", x)))
 }
 
-
+#' @export
 PcTable <- function(x, rnd = 1){
   tab <- table(x)
   nms <- names(tab)
