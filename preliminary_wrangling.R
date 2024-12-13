@@ -6,17 +6,21 @@
 # In other words, this scripts avoids going through e.g. the Result col ("PU", "unpl", "2nd", "PU", "Won*", etc..) and changing to 0, 1, 2, 3
 
 library(dplyr)
-library(googlesheets4)
-library(janitor)
+library(tidyr)
+library(readxl)
 
 source("app/logic/bets_app_functions.R")
 
-bets_clean_file <- "https://docs.google.com/spreadsheets/d/1W07fYGXmWTqsnwU4blM-ZxQTqA6mJW69JMVoBC3qde4/edit?usp=sharing"
+bets_clean_file <- "../../Downloads/bets_2022_clean.xlsx"
 
-bets_clean <- read_sheet(bets_clean_file)
+# bets_clean <- read_sheet(bets_clean_file)
+bets_clean <- read_excel(bets_clean_file)
 
 # For some reason col n is read in as list
-bets_clean$n <- bets_clean$n |> unlist() |> as.numeric()
+# bets_clean$n <- bets_clean$n |> unlist() |> as.numeric()
+
+# For some reason n col read in as character
+bets_clean$n <- as.numeric(bets_clean$n)
 
 # Put the two comments columns together
 bets_clean <- bets_clean |> 
@@ -43,8 +47,8 @@ complete.cases(
 
 # Convert price to decimal
 bets_clean <- bets_clean |> mutate(
-  Price_taken_dec = CleanPrice(Price_taken),
-  SP_dec = CleanPrice(sp)
+  price_taken_dec = CleanPrice(Price_taken),
+  sp_dec = CleanPrice(sp)
 )
 
 # Save
