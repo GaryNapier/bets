@@ -7,7 +7,10 @@ box::use(
     NS, 
     tagList, 
     fileInput, 
-    reactive
+    reactive, 
+    req, 
+    observeEvent, 
+    reactiveVal
   ], 
   readxl[read_excel]
 )
@@ -22,7 +25,6 @@ ui <- function(id) {
     fileInput(
       ns("input_file"),
       "Input file",
-      width = NULL
     )
     
   )
@@ -32,38 +34,23 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    # Files ----
-    bets_template_file <- "data/bets_template.xlsx"
-    
-    input_file <- reactive({
+    input_data_rctv <- reactiveVal()
+    observeEvent(input$input_file, {
+      
       req(input$input_file)
-    })
-    
-    # Read in template ----
-    message(paste("--- Reading in", bets_template_file, "---"))
-    bets_template <- tryCatch({
-      read_excel(bets_template_file)
-      message(paste("---", bets_template_file, "read in successfully ---"))
-    }, error = \(e){
-      message(
-        paste(
-          "---", 
-          bets_template_file, 
-          "not found ---"
+      
+      input_data_rctv(
+        read_excel(
+          input$input_file$datapath
         )
       )
+      
     })
     
-    # Read in input file ----
-    message("--- Reading in input file ---")
-    reactive({
-      read_excel(req(input_file()))
-    })
+    input_data_rctv
     
   })
 }
-
-
 
 
 # TODO
