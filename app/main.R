@@ -17,12 +17,13 @@ box::use(
     box
   ],
   stats[...], 
-  graphics[hist]
+  readxl[read_excel]
 )
 
 # Modules
 box::use(
-  app/view/read_in_data
+  app/view/read_in_data, 
+  app/view/clean_validate
 )
 
 
@@ -47,23 +48,23 @@ ui <- function(id) {
     dashboardBody(
       
       # Boxes need to be put in a row (or column)
-      fluidRow(
-        box(
-          plotOutput(
-            ns("plot1"),
-            height = 250
-          )
-        ),
+      # fluidRow(
+      #   box(
+      #     plotOutput(
+      #       ns("plot1"),
+      #       height = 250
+      #     )
+      #   ),
         
-        box(
-          title = "Controls",
-          sliderInput(
-            ns("slider"),
-            "Number of observations:", 
-            1, 100, 50
-          )
-        )
-      )
+        # box(
+        #   title = "Controls",
+        #   sliderInput(
+        #     ns("slider"),
+        #     "Number of observations:", 
+        #     1, 100, 50
+        #   )
+        # )
+      # )
       
     )
   )
@@ -75,16 +76,37 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    set.seed(122)
-    histdata <- rnorm(500)
+    # set.seed(122)
+    # histdata <- rnorm(500)
+    # 
+    # output$plot1 <- renderPlot({
+    #   data <- histdata[seq_len(input$slider)]
+    #   hist(data)
+    # })
     
-    output$plot1 <- renderPlot({
-      data <- histdata[seq_len(input$slider)]
-      hist(data)
-    })
+    # Files ----
+    bets_template_file <- "data/bets_template.xlsx"
     
     # Read in data ----
-    read_in_data$server("read_in_data")
+    input_data <- read_in_data$server("read_in_data")
+    
+    # Read in template
+    message(paste("--- Reading in", bets_template_file, "---"))
+    tryCatch({
+      bets_template <- read_excel(bets_template_file)
+      message(paste("---", bets_template_file, "read in successfully ---"))
+    }, error = \(e){
+      message(
+        paste(
+          "---", 
+          bets_template_file, 
+          "not found ---"
+        )
+      )
+    })
+    
+    # Clean and validate ----
+    clean_validate$server("clean_validate", input_data, bets_template)
     
   })
 }
