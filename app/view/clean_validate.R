@@ -25,8 +25,7 @@ ui <- function(id) {
 server <- function(id, input_data, bets_template) {
   moduleServer(
     id = id,
-    module = function(input, output, session
-    ) {
+    module = function(input, output, session) {
       
       # Test headers, returns TRUE or FALSE and issues shiny alert if fail
       headers_test <- reactive({
