@@ -91,10 +91,10 @@ server <- function(id) {
     input_data <- read_in_data$server("read_in_data")
     
     # Read in template
-    message(paste("--- Reading in", bets_template_file, "---"))
+    message(paste("--- Reading in template file", bets_template_file, "---"))
     tryCatch({
       bets_template <- read_excel(bets_template_file)
-      message(paste("---", bets_template_file, "read in successfully ---"))
+      message(paste("--- Template file", bets_template_file, "read in successfully ---"))
     }, error = \(e){
       message(
         paste(
