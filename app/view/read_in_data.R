@@ -12,7 +12,8 @@ box::use(
     observeEvent, 
     reactiveVal
   ], 
-  readxl[read_excel]
+  readxl[read_excel], 
+  shinyalert[shinyalert]
 )
 
 # bets_data <- read_sheet(bets_clean_file)
@@ -39,11 +40,30 @@ server <- function(id) {
       
       req(input$input_file)
       
-      input_data_rctv(
-        read_excel(
-          input$input_file$datapath
+      input_data <- tryCatch(
+          {
+            message("--- Input file: reading in ", input$input_file$datapath)
+            read_excel(input$input_file$datapath)
+            message("--- Input file:", input$input_file$datapath, " read in successfully ---")
+          }, error = \(e){
+            print(
+              utils::str(input$input_file)
+            )
+            err_msg <- paste(
+              "Input file read-in error: ", input$input_file$name, 
+              ";\nIs the file .xls or .xlsx?"
+              )
+            message(err_msg)
+            shinyalert(
+              title = "Error", 
+              type = "error", 
+              text = err_msg
+            )
+          }
         )
-      )
+      
+      # Set input data reactive
+      input_data_rctv(input_data)
       
     })
     
