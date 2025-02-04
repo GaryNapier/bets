@@ -4,10 +4,11 @@ box::use(
   shiny[
     moduleServer, 
     NS, 
-    plotOutput, 
+    tableOutput, 
     sliderInput, 
     fluidRow, 
-    renderPlot
+    renderTable, 
+    req
   ],
   shinydashboard[
     dashboardPage, 
@@ -17,7 +18,8 @@ box::use(
     box
   ],
   stats[...], 
-  readxl[read_excel]
+  readxl[read_excel], 
+  datasets[...]
 )
 
 # Modules
@@ -40,7 +42,7 @@ ui <- function(id) {
     # SIDEBAR ----
     dashboardSidebar(
       
-      read_in_data$ui(ns("read_in_data"))
+      read_in_data$ui(ns("read_in_data_module"))
       
     ),
     
@@ -48,23 +50,13 @@ ui <- function(id) {
     dashboardBody(
       
       # Boxes need to be put in a row (or column)
-      # fluidRow(
-      #   box(
-      #     plotOutput(
-      #       ns("plot1"),
-      #       height = 250
-      #     )
-      #   ),
-        
-        # box(
-        #   title = "Controls",
-        #   sliderInput(
-        #     ns("slider"),
-        #     "Number of observations:", 
-        #     1, 100, 50
-        #   )
-        # )
-      # )
+      fluidRow(
+        box(
+          tableOutput(
+            ns("input_data_table")
+          ), width = 200
+        )
+      )
       
     )
   )
@@ -76,67 +68,34 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    # set.seed(122)
-    # histdata <- rnorm(500)
-    # 
-    # output$plot1 <- renderPlot({
-    #   data <- histdata[seq_len(input$slider)]
-    #   hist(data)
-    # })
-    
     # Files ----
     bets_template_file <- "data/bets_template.xlsx"
     
     # Read in data ----
-    input_data <- read_in_data$server("read_in_data")
+    file_data <- read_in_data$server("read_in_data_module")
     
-    # Read in template
-    message(paste("--- Reading in template file", bets_template_file, "---"))
-    tryCatch({
-      bets_template <- read_excel(bets_template_file)
-      message(paste("--- Template file", bets_template_file, "read in successfully ---"))
-    }, error = \(e){
-      message(
-        paste(
-          "---", 
-          bets_template_file, 
-          "not found ---"
-        )
-      )
+    output$input_data_table <- renderTable({
+      req(file_data())
+      file_data()
     })
     
-    # Clean and validate ----
-    clean_validate$server("clean_validate", input_data, bets_template)
+    # Read in template
+    # message(paste("--- Reading in template file", bets_template_file, "---"))
+    # tryCatch({
+    #   bets_template <- read_excel(bets_template_file)
+    #   message(paste("--- Template file", bets_template_file, "read in successfully ---"))
+    # }, error = \(e){
+    #   message(
+    #     paste(
+    #       "---", 
+    #       bets_template_file, 
+    #       "not found ---"
+    #     )
+    #   )
+    # })
     
   })
 }
-
-
-
-
-
-#' #' @export
-#' ui <- function(id) {
-#'   ns <- NS(id)
-#'   bootstrapPage(
-#'     uiOutput(ns("message"))
-#'   )
-#' }
-#' 
-#' #' @export
-#' server <- function(id) {
-#'   moduleServer(id, function(input, output, session) {
-#'     output$message <- renderUI({
-#'       div(
-#'         style = "display: flex; justify-content: center; align-items: center; height: 100vh;",
-#'         tags$h1(
-#'           tags$a("Check out Rhino docs!", href = "https://appsilon.github.io/rhino/")
-#'         )
-#'       )
-#'     })
-#'   })
-#' }
-
 
 
 
