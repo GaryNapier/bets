@@ -16,18 +16,14 @@ box::use(
   shinyalert[shinyalert]
 )
 
-# bets_data <- read_sheet(bets_clean_file)
-
 #' @export
 ui <- function(id) {
   ns <- NS(id)
   tagList(
-    
     fileInput(
-      ns("input_file"),
-      "Input file",
+      ns("input_file"), 
+      "Input file"
     )
-    
   )
 }
 
@@ -35,56 +31,31 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     
-    input_data_rctv <- reactiveVal()
-    observeEvent(input$input_file, {
-      
+    file_data <- reactive({
       req(input$input_file)
-      
-      input_data <- tryCatch(
-          {
-            message("--- Input file: reading in ", input$input_file$datapath)
-            read_excel(input$input_file$datapath)
-            message("--- Input file:", input$input_file$datapath, " read in successfully ---")
-          }, error = \(e){
-            print(
-              utils::str(input$input_file)
-            )
-            err_msg <- paste(
-              "Input file read-in error: ", input$input_file$name, 
-              ";\nIs the file .xls or .xlsx?"
-              )
-            message(err_msg)
-            shinyalert(
-              title = "Error", 
-              type = "error", 
-              text = err_msg
-            )
-          }
-        )
-      
-      # Set input data reactive
-      input_data_rctv(input_data)
-      
+      tryCatch({
+        message(paste("--- Input file: reading in", input$input_file$name, "---"))
+        read_excel(input$input_file$datapath)
+       }, error = \(e){
+         err_msg <- paste(
+           "Input file read-in error: ", input$input_file$name,
+           ";\nIs the file .xls or .xlsx?"
+         )
+         message(err_msg)
+         shinyalert(
+           title = "Error",
+           type = "error",
+           text = err_msg
+         )
+         err_msg
+      })
     })
-    
-    input_data_rctv
-    
+    return(file_data)
   })
 }
 
-
 # TODO
 # bets_template error message - popup message with link if template not found
-
-
-
-
-
-
-
-
-
-
 
 
 
